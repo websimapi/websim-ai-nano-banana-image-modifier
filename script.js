@@ -8,10 +8,12 @@ const originalPlaceholder = document.getElementById('original-placeholder');
 const modifiedPlaceholder = document.getElementById('modified-placeholder');
 
 let imageDataUrl = null;
+let promptText = '';
 
 // Helper function to handle UI state changes
 function setAppState(isLoading) {
-    generateButton.disabled = isLoading || !imageDataUrl;
+    const isReady = imageDataUrl && promptText.length > 0;
+    generateButton.disabled = isLoading || !isReady;
     loadingIndicator.classList.toggle('hidden', !isLoading);
     promptInput.disabled = isLoading;
     imageInput.disabled = isLoading;
@@ -30,7 +32,7 @@ imageInput.addEventListener('change', (event) => {
             originalImagePreview.classList.remove('hidden');
             originalPlaceholder.classList.add('hidden');
             
-            // Enable the button if we have an image
+            // Enable the button if we have an image AND a prompt
             setAppState(false);
 
             // Clear previous modification result
@@ -48,14 +50,20 @@ imageInput.addEventListener('change', (event) => {
     }
 });
 
+// Track prompt input for button enabling
+promptInput.addEventListener('input', () => {
+    promptText = promptInput.value.trim();
+    setAppState(false);
+});
+
 // Main generation logic
 generateButton.addEventListener('click', async () => {
-    if (!imageDataUrl || promptInput.value.trim() === '') {
+    if (!imageDataUrl || promptText === '') {
         alert('Please upload an image and provide a modification prompt.');
         return;
     }
 
-    const prompt = promptInput.value.trim();
+    const prompt = promptText;
     setAppState(true);
     
     modifiedImageOutput.classList.add('hidden');
@@ -92,5 +100,4 @@ generateButton.addEventListener('click', async () => {
 });
 
 // Initial state setup
-setAppState(false); 
-
+setAppState(false);
